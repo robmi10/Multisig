@@ -10,9 +10,10 @@ contract MultiSig {
     address [] public multisigOwners;
     uint256 public transactionCounter;
     uint256 public required;
+    uint256 public owner;
 
     mapping(uint256 => mapping(address => bool)) public approved;
-    mapping(uint256 => bool) isOwner;
+    mapping(address => bool) isOwner;
 
     struct Transactions {
         address to;
@@ -32,25 +33,28 @@ contract MultiSig {
             }
             require(_owner != address(0), "Valid address");
             require(!isOwner[_owner], "Owner already exist");
+            multisigOwners.push(_owner);
+            required = _required;
         }
-        multisigOwners = _owners;
     }
 
 
     function createTransaction (address _to, uint256 _amount, bytes memory _data) external {
-        transactionList[transactionCounter] = transactionStruct(msg.sender, _to, _amount);
-        emit created(msg.sender, _to, _amount, _data);
+        transactionList.push(Transactions( _to, _amount, "",false));
+        emit created(msg.sender, _to, _amount, "");
         transactionCounter++;
+            // console.log("transactionList length ->",transactionList.length);
     }
 
     modifier onlySigOwners{
-        for(uint256 = i; i < multisigOwners.length; ){
-            unchecked {
-                i++;
-            }
-        address memory _multisigOwners = multisigOwners;
-        require(msg.sender == _multisigOwners[i]);
+        owner = 0;
+        for(uint256 i; i < multisigOwners.length; i++){      
+        address _multisigOwners = multisigOwners[i];
+         if(msg.sender == _multisigOwners){
+            owner = 1;
+         }
         _;
+        owner = 0;
         }
     }
 
@@ -59,29 +63,32 @@ contract MultiSig {
         approved[_id][msg.sender] = true;
     }
 
-    function sendTx (uint256 _id) external {
+    function sendTx (uint256 _id) external payable {
         uint256 _votes = 0;
-        (address to, uint256 value, bytes data, bool executed ) = transactionList[_id];
-        require(msg.value == _value, "To little value");
-          require(!executed, "Transaction already executed");
-        for(uint256 i; i < multisigOwners.length; ){
-            unchecked {
-                i++;
-            }
+        address to = transactionList[_id].to;
+        uint256 value = transactionList[_id].value;
+        bytes memory data = transactionList[_id].data;
+        bool executed = transactionList[_id].executed;
+
+        require(msg.value == value, "To little value");
+        require(!executed, "Transaction already executed");
+        for(uint256 i; i < multisigOwners.length; i++){
+         
             bool votes = approved[_id][multisigOwners[i]];
-            while(votes){
+            if(votes){
                 _votes++;
             }
             
         }
+
         if(_votes == required){
            (bool status, bytes memory call) =  to.call{value: value}("");
            require(status, "transaction failed");
-            emit send(msg.sender, to, value, data, executed);
+            emit send(msg.sender, to, value);
            executed = true;
            required = 0;
         }else{
-            revert("all owners haven't accept the transaction");
+            revert("all owners havent accept the transaction");
         }
    
     } 
