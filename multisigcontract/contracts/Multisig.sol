@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later 
-pragma solidity ^0.8.13;
-import "forge-std/console.sol";
+pragma solidity ^0.8.4;
 
-contract MultiSig {
+contract Multisig {
     event Send(address indexed _from, address indexed _to, uint256 indexed value);
     event Created(address indexed _from, address indexed _to, uint256 indexed value, bytes data);
 
