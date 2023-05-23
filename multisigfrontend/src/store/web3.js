@@ -8,6 +8,9 @@ const initialWeb3Props = {
   account: null,
   //   chainId: null,
 };
+
+export const isLoading = writable({ functionStatus: "", data: null });
+
 export const web3Store = writable(initialWeb3Props);
 
 function createLocalStorageStore(key, startValue) {

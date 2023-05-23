@@ -31,6 +31,37 @@ export const abi = [
         type: "address",
       },
       {
+        indexed: false,
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
+      },
+      {
+        indexed: false,
+        internalType: "address",
+        name: "_approver",
+        type: "address",
+      },
+    ],
+    name: "Approve",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "_from",
+        type: "address",
+      },
+      {
+        indexed: true,
+        internalType: "address",
+        name: "_to",
+        type: "address",
+      },
+      {
         indexed: true,
         internalType: "uint256",
         name: "value",
@@ -128,7 +159,7 @@ export const abi = [
     ],
     name: "createTransaction",
     outputs: [],
-    stateMutability: "nonpayable",
+    stateMutability: "payable",
     type: "function",
   },
   {

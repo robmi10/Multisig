@@ -1,0 +1,141 @@
+<script>
+  import { ethers } from "ethers";
+  import { callContractFunction } from "../../store/web3Function";
+  import { flip } from 'svelte/animate';
+  import { crossfade } from "svelte/transition";
+  import { quintOut } from 'svelte/easing';
+  import { Circle } from 'svelte-loading-spinners';
+  import { isLoading } from "../../store/web3";
+
+
+  let data;
+
+  const textStyle = 'text-white text-md font-bold w-26'
+  const texth1 = 'text-white text-md w-16'
+  const [send, receive] = crossfade({
+		fallback(node, params) {
+			const style = getComputedStyle(node);
+			const transform = style.transform === 'none' ? '' : style.transform;
+
+			return {
+				duration: 600,
+				easing: quintOut,
+				css: t => `
+					transform: ${transform} scale(${t});
+					opacity: ${t}
+				`
+			};
+		}
+	});
+  
+  const fetchEvents = async () => {
+    try {
+      const response = await fetch('https://api.studio.thegraph.com/query/47164/multisigv6/v0.0.1', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+            query: `{
+                      transactions {
+                        id
+                        _from
+                        _to
+                        value
+                        data
+                        approvals {
+                          id
+                          owner
+                          approver
+                          amount
+                        }
+                        send {
+                          id
+                          _from
+                          _to
+                          value
+                        }
+                      }
+                    }
+                  `
+        })
+      })
+      
+      const res = await response.json()
+      data = res.data.transactions
+      console.log({res})
+      console.log({data})
+    } catch (error) {
+      console.error({error})
+    }
+
+    
+  }
+  
+  fetchEvents()
+
+  const sendTransaction = async(id) =>{
+      try {
+          await callContractFunction('sendTx','Created', ["_from", "_to"] , id)
+          isLoading.set({functionStatus: 'sendTx', data: id})
+      } catch (error) {
+          console.error({error})
+      }
+    }
+
+    const approve = async(id) =>{
+    try {
+        await callContractFunction('approve','Approve', ["_from", "_to", "_amount", "_approver"] , false, id)
+        isLoading.set({functionStatus: 'approve', data: id})
+        console.log({approveIsloading: $isLoading})
+    } catch (error) {
+        console.error({error})
+    }
+  }
+
+  console.log({dataCheck: data})
+  </script>
+  
+  <div class="w-full overflow-auto p-8 drop-shadow-lg flex items-center justify-center flex-col">
+    {#if data}
+    {#each data as transaction, index (transaction.id)  }
+    <div class="mb-4 drop-shadow-xl border-1 w-full bg-gradient-to-r from-blue-300 via-cayan-300 to-white-300 items-center flex justify-center gap-8 rounded-md p-4 hover:bg-gradient-to-r hover:from-blue-400 hover:via-cayan-400 hover:to-white-400 hover:transition-all"
+    in:receive="{{key: transaction.id}}"
+    out:send="{{key: transaction.id}}"
+    animate:flip
+>
+      <div>
+        <h1 class={textStyle}>FROM</h1>
+        <h1 class={texth1}> {transaction._from.substring(0, 8)}</h1>
+      </div>
+      <div>
+        <h1 class={textStyle}>TO</h1>
+        <h1 class={texth1}>{transaction._to.substring(0, 8  )}</h1>
+      </div>
+      <div>
+        <h1 class={textStyle}>AMOUNT</h1>
+        <div class="flex gap-1">
+          <h1 class={texth1}>{ethers.formatEther(transaction.value.toString())}</h1>
+          <h1 class={texth1}>MATIC</h1>
+        </div>
+      </div>
+  
+      <div>
+        <h1 class={textStyle}>APPROVED</h1>
+        <h1 class={texth1}>{transaction?.approvals.length}</h1>
+      </div>
+      {#if transaction.approved == 2}
+      <button class="bg-white rounded-full w-36 p-4" on:click={() => {sendTransaction(index)}}>Send</button>
+      {:else if $isLoading.data == index}
+      <button class="bg-white rounded-full w-36 p-4 flex justify-center" on:click={() => {sendTransaction(index)}}>    
+        <Circle size="25" color="#3b86ff" unit="px" duration="1s" />
+      </button>
+      {:else }
+      <button class="bg-white rounded-full w-36 p-4 hover:drop-shadow-lg hover:bg-slate-50" on:click={() => {approve(index)}}>Approve</button> 
+      {/if}
+    </div>
+      
+    {/each}
+    {/if}
+  </div>  

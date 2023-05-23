@@ -4,6 +4,8 @@ pragma solidity ^0.8.4;
 contract Multisig {
     event Send(address indexed _from, address indexed _to, uint256 indexed value);
     event Created(address indexed _from, address indexed _to, uint256 indexed value, bytes data);
+    event Approve(address indexed _from, address indexed _to, uint256 _amount, address _approver);
+
 
     address [] public multisigOwners;
     uint256 public transactionCounter;
@@ -37,30 +39,35 @@ contract Multisig {
     }
 
 
-    function createTransaction (address _to, uint256 _amount, bytes memory _data) external {
+    function createTransaction (address _to, uint256 _amount, bytes memory _data) external payable {
+        require(msg.value == _amount, "To little amount");
         transactionList.push(Transactions( _to, msg.sender, _amount, _data,false));
-        emit Created(msg.sender, _to, _amount, "");
         transactionCounter++;
+        emit Created(msg.sender, _to, _amount, "");
     }
 
-    modifier onlySigOwners{
-        uint256 ownersLength = multisigOwners.length;
-        uint256 owner;
-        for(uint256 i; i < ownersLength; ){      
-        address _multisigOwners = multisigOwners[i];
-         if(msg.sender == _multisigOwners){
-            owner = 1;
-         }
-        unchecked{
-         i++;
-        }
-        _;
-        owner = 0;
-        }
-    }
+           modifier onlySigOwners {
+                uint256 owner = 0;
+                for (uint256 i = 0; i < multisigOwners.length; i++) {      
+                    if (msg.sender == multisigOwners[i]) {
+                        owner = 1;
+                        break;
+                    }
+                }
+                require(owner == 1, "Not a multisig owner");
+                _;
+            }
 
     function approve (uint256 _id) external onlySigOwners{
+        bool isApproved = approved[_id][msg.sender];
+        require(!isApproved, "approved already by the signer");
         approved[_id][msg.sender] = true;
+        address to = transactionList[_id].to;
+        address from = transactionList[_id].from;
+        uint256 amount = transactionList[_id].value;
+        emit Approve (from, to, amount, msg.sender);
+
+
     }
 
     function sendTx (uint256 _id) external payable {
@@ -87,9 +94,9 @@ contract Multisig {
         if(_votes == required){
             (bool status, ) =  to.call{value: msg.value}(data);
             require(status, "transaction failed");
-            emit Send(msg.sender, to, value);
             executed = true;
             required = 0;
+            emit Send(msg.sender, to, value);
         }else{
             revert("all owners havent accept the transaction");
         }
