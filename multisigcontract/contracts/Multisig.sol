@@ -2,9 +2,9 @@
 pragma solidity ^0.8.4;
 
 contract Multisig {
-    event Send(address indexed _from, address indexed _to, uint256 indexed value);
-    event Created(address indexed _from, address indexed _to, uint256 indexed value, bytes data);
-    event Approve(address indexed _from, address indexed _to, uint256 _amount, address _approver);
+    event Send(address indexed _from, address indexed _to, uint256 indexed counter, uint256  value);
+    event Created(address indexed _from, address indexed _to, uint256 indexed counter , bytes data, uint256  value);
+    event Approve(address indexed _from, address indexed _to, uint256 indexed counter , address _approver, uint256 _amount);
 
 
     address [] public multisigOwners;
@@ -43,7 +43,7 @@ contract Multisig {
         require(msg.value == _amount, "To little amount");
         transactionList.push(Transactions( _to, msg.sender, _amount, _data,false));
         transactionCounter++;
-        emit Created(msg.sender, _to, _amount, "");
+        emit Created(msg.sender, _to, transactionCounter, "", _amount);
     }
 
            modifier onlySigOwners {
@@ -65,7 +65,7 @@ contract Multisig {
         address to = transactionList[_id].to;
         address from = transactionList[_id].from;
         uint256 amount = transactionList[_id].value;
-        emit Approve (from, to, amount, msg.sender);
+        emit Approve (from, to, _id, msg.sender, amount);
 
 
     }
@@ -96,7 +96,7 @@ contract Multisig {
             require(status, "transaction failed");
             executed = true;
             required = 0;
-            emit Send(msg.sender, to, value);
+            emit Send(msg.sender, to, _id, value);
         }else{
             revert("all owners havent accept the transaction");
         }
