@@ -31,9 +31,9 @@ export const abi = [
         type: "address",
       },
       {
-        indexed: false,
+        indexed: true,
         internalType: "uint256",
-        name: "_amount",
+        name: "counter",
         type: "uint256",
       },
       {
@@ -41,6 +41,12 @@ export const abi = [
         internalType: "address",
         name: "_approver",
         type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "_amount",
+        type: "uint256",
       },
     ],
     name: "Approve",
@@ -64,7 +70,7 @@ export const abi = [
       {
         indexed: true,
         internalType: "uint256",
-        name: "value",
+        name: "counter",
         type: "uint256",
       },
       {
@@ -72,6 +78,12 @@ export const abi = [
         internalType: "bytes",
         name: "data",
         type: "bytes",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "value",
+        type: "uint256",
       },
     ],
     name: "Created",
@@ -94,6 +106,12 @@ export const abi = [
       },
       {
         indexed: true,
+        internalType: "uint256",
+        name: "counter",
+        type: "uint256",
+      },
+      {
+        indexed: false,
         internalType: "uint256",
         name: "value",
         type: "uint256",

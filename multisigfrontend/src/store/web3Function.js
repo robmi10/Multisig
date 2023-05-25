@@ -1,7 +1,7 @@
 // utils.js
 import { Contract, ethers } from "ethers";
 import { get as getStoreValue } from "svelte/store";
-import { account, web3Store } from "./web3";
+import { account, isToaster, web3Store } from "./web3";
 import { CONTRACT_ADDRESS } from "../lib/constant/contract";
 import { abi } from "../lib/constant/abi.js";
 import { isLoading } from "../store/web3";
@@ -50,6 +50,7 @@ export async function callContractFunction(
     console.log("Transaction hash:", event.transactionHash);
 
     isLoading.set({ functionStatus: "", data: null });
+    isToaster.set({ toaster: true, data: functionName.toString() });
   });
 
   console.log("Contract function result:", result);

@@ -1,9 +1,8 @@
 <script>
   import CreateTransaction from "./component/createTransaction.svelte";
   import GetData from "./component/graphQL/getData.svelte";
-  import SendTx from "./component/sendTx.svelte";
   import Navbar from "./routes/+navbar.svelte";
-  import {  account, isLoading, web3Store } from "./store/web3";
+  import {  account, isLoading, isToaster, web3Store } from "./store/web3";
   import toast, { Toaster } from 'svelte-french-toast';
 
 
@@ -12,12 +11,27 @@
   const textH2 = 'text-white text-2xl font-bold flex  flex-col justify-center drop-shadow-lg  items-center p-4'
 
   $:{
-    // if()
+    if($isToaster.toaster && $isToaster.data == 'approve'){
+      console.log({isToasterApprover:  $isToaster.toaster})
+      toast.success("Transaction is approved!")
+      isToaster.set({ toaster: false, data: "" });
+    }else if ($isToaster.toaster && $isToaster.data == 'sendTx'){
+      console.log({isToasterSend:  $isToaster.toaster})
+
+      toast.success("Transaction is sent!")
+      isToaster.set({ toaster: false, data: "" });
+    }
+    else if ($isToaster.toaster && $isToaster.data == 'createTransaction'){
+      console.log({isToasterCreate:  $isToaster.toaster})
+
+      toast.success("Transaction is created!")
+      isToaster.set({ toaster: false, data: "" });
+    }
   }
 </script>
 
 <main>
-  <div class="h-full w-screen p-10 bg-gradient-to-r from-cyan-200 to-blue-800  justify-center items-center flex gap-4 flex-col">
+  <div class="h-screen w-screen p-10 bg-gradient-to-r from-cyan-200 to-blue-800  justify-center items-center flex gap-4 flex-col">
     <div class="w-2/4 flex items-center justify-between p-5">
       <Navbar/>
       {#if $account}

@@ -10,6 +10,7 @@ const initialWeb3Props = {
 };
 
 export const isLoading = writable({ functionStatus: "", data: null });
+export const isToaster = writable({ toaster: false, data: null });
 
 export const web3Store = writable(initialWeb3Props);
 

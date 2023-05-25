@@ -27,9 +27,7 @@
     catch(error){
         console.error({error})
     }
-    finally{
-      toast.success("Transaction Created!");
-    }
+
   } 
 
 </script>
