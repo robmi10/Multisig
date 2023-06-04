@@ -42,11 +42,11 @@ contract Multisig {
     function createTransaction (address _to, uint256 _amount, bytes memory _data) external payable {
         require(msg.value == _amount, "To little amount");
         transactionList.push(Transactions( _to, msg.sender, _amount, _data,false));
-        transactionCounter++;
         emit Created(msg.sender, _to, transactionCounter, "", _amount);
+        transactionCounter++;
     }
 
-           modifier onlySigOwners {
+            modifier onlySigOwners {
                 uint256 owner = 0;
                 for (uint256 i = 0; i < multisigOwners.length; i++) {      
                     if (msg.sender == multisigOwners[i]) {
@@ -66,8 +66,6 @@ contract Multisig {
         address from = transactionList[_id].from;
         uint256 amount = transactionList[_id].value;
         emit Approve (from, to, _id, msg.sender, amount);
-
-
     }
 
     function sendTx (uint256 _id) external payable {
@@ -95,7 +93,7 @@ contract Multisig {
             (bool status, ) =  to.call{value: msg.value}(data);
             require(status, "transaction failed");
             executed = true;
-            required = 0;
+            _votes = 0;
             emit Send(msg.sender, to, _id, value);
         }else{
             revert("all owners havent accept the transaction");

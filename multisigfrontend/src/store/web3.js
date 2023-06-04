@@ -11,7 +11,7 @@ const initialWeb3Props = {
 
 export const isLoading = writable({ functionStatus: "", data: null });
 export const isToaster = writable({ toaster: false, data: null });
-
+export const fetchData = writable({ status: false });
 export const web3Store = writable(initialWeb3Props);
 
 function createLocalStorageStore(key, startValue) {

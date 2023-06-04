@@ -4,31 +4,33 @@
   export let amount = ""
   export let addressTo = ""
   import { Circle } from 'svelte-loading-spinners';
-  import { isLoading } from "../store/web3";
+  import { isLoading, fetchData } from "../store/web3";
 
   const headerStyle = 'text-white text-2xl font-bold'
   const textStyle = 'text-white text-md font-bold'
-
+  let status
   $: console.log({$isLoading})
 
   const createTx = async ( ) =>{
-    console.log({amount})
-    console.log({addressTo})
+    console.log("inside createTx!")
     if(!amount || ! addressTo) return false;
-    console.log({amount})
-    console.log({addressTo})
     const data = ethers.encodeBytes32String("")
-
     try{
-        await callContractFunction('createTransaction','Created', ["_from", "_to", "value"], amount, addressTo, ethers.parseEther(amount).toString(), data)
-        isLoading.set({functionStatus: 'createTransaction', data: null})
-        console.log({isLoadingCeck: $isLoading})
+        await callContractFunction('createTransaction','Created', ["_from", "_to", "value"], amount, addressTo, ethers.parseEther(amount).toString(), data).then(async (res) =>{
+        console.log({res})
+        isLoading.set({functionStatus: '', data: null})
+        fetchData.set({status: true})
+      })
+      
+      .catch((error) => console.error({error}));
+    
     }
     catch(error){
         console.error({error})
     }
 
   } 
+
 
 </script>
 
@@ -49,7 +51,7 @@
 </div>
 
 {#if $isLoading.functionStatus == 'createTransaction'}
-<button class=" bg-white hover:drop-shadow-xl rounded-full hover:bg-slate-50 hover:transition-all hover: duration-500 w-36 p-4 flex justify-center" on:click={() => {createTx()}}>	
+<button class=" bg-white hover:drop-shadow-xl rounded-full hover:bg-slate-50 hover:transition-all hover: duration-500 w-36 p-4 flex justify-center" >	
   <Circle size="25" color="#3b86ff" unit="px" duration="1s" />
 </button>
   {:else}

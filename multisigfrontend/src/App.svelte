@@ -11,27 +11,28 @@
   const textH2 = 'text-white text-2xl font-bold flex  flex-col justify-center drop-shadow-lg  items-center p-4'
 
   $:{
+    console.log("inside toaster check -> ", $isToaster.data)
     if($isToaster.toaster && $isToaster.data == 'approve'){
       console.log({isToasterApprover:  $isToaster.toaster})
       toast.success("Transaction is approved!")
       isToaster.set({ toaster: false, data: "" });
     }else if ($isToaster.toaster && $isToaster.data == 'sendTx'){
       console.log({isToasterSend:  $isToaster.toaster})
-
       toast.success("Transaction is sent!")
       isToaster.set({ toaster: false, data: "" });
     }
     else if ($isToaster.toaster && $isToaster.data == 'createTransaction'){
-      console.log({isToasterCreate:  $isToaster.toaster})
-
+      // console.log({isToasterCreate:  $isToaster.toaster})
+      console.log("isToasterCreate now")
       toast.success("Transaction is created!")
       isToaster.set({ toaster: false, data: "" });
+      console.log({isToasterCreateSetTofalse:  $isToaster.toaster})
     }
   }
 </script>
 
 <main>
-  <div class="h-screen w-screen p-10 bg-gradient-to-r from-cyan-200 to-blue-800  justify-center items-center flex gap-4 flex-col">
+  <div class="h-full w-screen p-10 bg-gradient-to-r from-cyan-200 to-blue-800  justify-center items-center flex gap-4 flex-col">
     <div class="w-2/4 flex items-center justify-between p-5">
       <Navbar/>
       {#if $account}
@@ -45,8 +46,6 @@
         </div>
         <div class=" float-right w-2/4 flex items-center flex-col gap-4">
           <CreateTransaction/>
-          <!-- <Approve/> -->
-          <!-- <SendTx/> -->
           <GetData/>
         </div>
       
