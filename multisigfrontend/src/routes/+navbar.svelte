@@ -4,7 +4,7 @@
 </script>
 
 <main>
-    <div class=" flex w-96 ">
+    <div class=" flex w-full ">
         <ConnectWallet/>
     </div>
 </main>

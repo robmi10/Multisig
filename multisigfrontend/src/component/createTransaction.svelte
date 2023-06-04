@@ -8,20 +8,15 @@
 
   const headerStyle = 'text-white text-2xl font-bold'
   const textStyle = 'text-white text-md font-bold'
-  let status
-  $: console.log({$isLoading})
 
   const createTx = async ( ) =>{
-    console.log("inside createTx!")
     if(!amount || ! addressTo) return false;
     const data = ethers.encodeBytes32String("")
     try{
         await callContractFunction('createTransaction','Created', ["_from", "_to", "value"], amount, addressTo, ethers.parseEther(amount).toString(), data).then(async (res) =>{
-        console.log({res})
         isLoading.set({functionStatus: '', data: null})
         fetchData.set({status: true})
       })
-      
       .catch((error) => console.error({error}));
     
     }
@@ -38,7 +33,7 @@
     
   <h1 class={headerStyle}>Create a transaction</h1>
   
-<div class="flex flex-row gap-4  p-5">
+<div class="flex flex-col md:flex-row gap-4 p-5">
   <div >
     <h1 class={textStyle}>AMOUNT</h1>
     <input  class=" drop-shadow-lg rounded-md p-2" bind:value={amount} />

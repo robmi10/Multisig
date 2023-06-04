@@ -15,8 +15,8 @@
   let combinedArray;
   let status;
 
-  const textStyle = 'text-white text-md font-bold w-26'
-  const texth1 = 'text-white text-md w-16'
+  const textStyle = 'text-white text-md font-bold w-8 md:w-26'
+  const texth1 = 'text-white text-md w-8 md:w-16'
   const [send, receive] = crossfade({
 		fallback(node, params) {
 			const style = getComputedStyle(node);
@@ -34,7 +34,6 @@
 	});
   
   const fetchEvents = async () => {
-    console.log("check fetchEvents")
     try {
       const response = await fetch('https://api.studio.thegraph.com/query/47164/multisig13/v0.0.1', {
         method: 'POST',
@@ -84,15 +83,9 @@
       
       
       const res = await response.json()
-      // data = res.data.transactions
-      // console.log({res})
-      // console.log({data})
-
       let createds = res?.data?.createds
       let approves = res?.data?.approves
       let send = res?.data?.sends
-
-      // console.log({createds})
 
       const groupData = createds.reduce((map, created) =>{
         map[created?.counter] = {
@@ -103,9 +96,7 @@
         return map;
       }, {})
 
-      console.log({groupData})
-
-      const groupDataArray = Object.values(groupData).filter((object) => object.send.length === 0);
+      const groupDataArray = Object.values(groupData).filter((object) => object.send.length == 0);
       data = [...groupDataArray];
       status = true
     } catch (error) {
@@ -114,18 +105,19 @@
   }
 
 	onMount(async () => {
-    console.log("inside fetchEvents now")
+   
     fetchEvents()
 	});
 
   const sendTransaction = async(id, amount) =>{
       try {
-          console.log("sendTransaction", id)
+         
           await callContractFunction('sendTx','Send', ["_from", "_to", "counter", "value"], amount, id).then(async (res) =>{
-            console.log({res})
+          
             isLoading.set({ functionStatus: "", data: null });
+            // fetchData.set({status: true})
             await fetchEvents()
-            fetchData.set({status: false})
+
           })
       } catch (error) {
           console.error({error})
@@ -134,13 +126,12 @@
     
   const approve = async(id) =>{
     try {
-      console.log("inside approve function!", id )
-      
       await callContractFunction('approve','Approve', ["_from", "_to", "_amount", "_approver"] , false, id).then(async (res) =>{
-        console.log({res})
+   
         isLoading.set({ functionStatus: "", data: null });
         await fetchEvents()
-        fetchData.set({status: false})
+        // fetchData.set({status: true})
+        // fetchData.set({status: false})
       })
       
       .catch((error) => console.error({error}));
@@ -153,36 +144,34 @@
 
   
   $:{
-    console.log({currentStatus: $isLoading})
-    console.log({LoadingData: $isLoading.data})
 
-    if(fetchData){
-      console.log({currentStatusfetchData: $fetchData.status})
+    if($fetchData.status){
+
+
       fetchEvents()
     }
   } 
 
 
-  // console.log({combinedArray})
   </script>
   
-  <div class="w-full overflow-auto drop-shadow-lg flex items-center justify-center flex-col p-20">
+  <div class="w-full overflow-auto drop-shadow-lg flex items-center justify-center flex-col">
     {#if data}
-    {#each data as transaction, index (transaction.created.id)  }
-    <div class="mb-4 drop-shadow-xl border-1 w-full bg-gradient-to-r from-blue-300 via-cayan-300 to-white-300 items-center flex justify-center gap-8 rounded-md p-4 hover:bg-gradient-to-r hover:from-blue-400 hover:via-cayan-400 hover:to-white-400 hover:transition-all"
+    {#each data as transaction (transaction.created.id)  }
+    <div class="mb-4 drop-shadow-xl border-1 w-full bg-gradient-to-r from-blue-300 via-cayan-300 to-white-300 gap-4 md:gap-0 md:items-center flex flex-col md:flex-row justify-around rounded-md p-4 hover:bg-gradient-to-r hover:from-blue-400 hover:via-cayan-400 hover:to-white-400 hover:transition-all"
     in:receive="{{key: transaction.id}}"
     out:send="{{key: transaction.id}}"
     animate:flip>
       <div>
-        <h1 class={textStyle}>FROM</h1>
+        <h1 class="text-white text-xs md:text-md font-bold w-8 md:w-26">FROM</h1>
         <h1 class={texth1}> {transaction.created._from.substring(0, 8)}</h1>
       </div>
       <div>
-        <h1 class={textStyle}>TO</h1>
+        <h1 class="text-white text-xs md:text-md font-bold w-8 md:w-26">TO</h1>
         <h1 class={texth1}>{transaction.created._to.substring(0, 8  )}</h1>
       </div>
       <div>
-        <h1 class={textStyle}>AMOUNT</h1>
+        <h1 class="text-white text-xs md:text-md font-bold w-8 md:w-26">AMOUNT</h1>
         <div class="flex gap-1">
           <h1 class={texth1}>{ethers.formatEther(transaction.created.value.toString())}</h1>
           <!-- <h1 class={texth1}>  MATIC</h1> -->
@@ -190,11 +179,11 @@
       </div>
   
      <div>
-        <h1 class={textStyle}>APPROVED</h1>
+        <h1 class="text-white text-xs md:text-md font-bold w-8 md:w-26">APPROVED</h1>
         {#if transaction?.approves?.length >= 2}
-        <Icon src={AiOutlineCheck} color="lightgreen" />
+        <Icon  src={AiOutlineCheck} color="lightgreen" />
         {:else}
-        <h1 class={texth1}>{transaction?.approves?.length || 0}</h1>
+        <h1 class=" text-white">{transaction?.approves?.length || 0}</h1>
         {/if}
       </div>
      
